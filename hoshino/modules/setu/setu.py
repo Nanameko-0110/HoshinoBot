@@ -1,4 +1,5 @@
 import os
+import re
 import random
 import asyncio
 import requests
@@ -8,6 +9,7 @@ from urllib.parse import urlparse
 from nonebot.exceptions import CQHttpError
 
 from hoshino import R, Service, priv
+from hoshino.typing import *
 from hoshino.util import FreqLimiter, DailyNumberLimiter, fig2b64
 from matplotlib import pyplot as plt
 
@@ -99,8 +101,8 @@ def get_setu(R18=False, keyword=''):
 
 # 以命令形式响应
 
-@sv.on_command('setu', deny_tip=SETU_DISABLE_NOTICE, aliases=setu_aliases, only_to_me=True)
-async def setu(bot, ev):
+@sv.on_prefix(setu_aliases, only_to_me=True)
+async def setu(bot, ev: CQEvent):
     """随机叫一份涩图，对每个用户有冷却时间"""
     uid = ev['user_id']
     _ncnt.check(uid)  # 刷新次数
@@ -111,7 +113,10 @@ async def setu(bot, ev):
         if not _flmt.check(uid):
             await bot.send(ev, '您冲得太快了，请稍候再冲', at_sender=True)
             return
-        pic, meta = get_setu(r18, kw)
+    kw = ev.message.extract_plain_text()
+    r18 = True if random.random() < 0.05 else False
+    pic, meta = get_setu(r18, kw)
+    try:
         msg_id = (await bot.send(ev, f'{pic.cqcode}\nPid: {meta[0]}\tAuthor: {meta[1]}\nTags: {"; ".join(meta[2][1::2])}'))['message_id']
         self_id = ev['self_id']
         _flmt.start_cd(uid)
@@ -131,15 +136,7 @@ async def setu(bot, ev):
         await bot.send(ev, f'这张涩图太涩，不给你们看啦！\n{chieri}')
 
 
-# setu.args_parser 装饰器将函数声明为 setu 命令的参数解析器
-# 命令解析器用于将用户输入的参数解析成命令真正需要的数据
-@setu.args_parser
-async def _(session:CommandSession):
-    stripped_arg = session.current_arg_text.strip()
-    session.state['keyword'] = stripped_arg
-
-
-@sv.on_command('涩图头子排行榜', aliases='色图头子排行榜', only_to_me=True)
+@sv.on_command(('涩图头子排行榜', '色图头子排行榜'), only_to_me=True)
 async def setu_ranking(bot, ev):
     mstat = []
     mlist = (await bot.get_group_member_list(self_id=ev['self_id'], group_id=ev['group_id']))
@@ -178,13 +175,13 @@ async def setu_ranking(bot, ev):
         await bot.send(ev, MessageSegment.image(pic), at_sender=True)
 
 
-@sv.on_rex(r'^来瓶营养快线$', normalize=False)
+@sv.on_prefix('来瓶营养快线')
 async def energize(bot, ev):
     if ev['user_id'] not in bot.config.SUPERUSERS:
         await bot.send(ev, R.img('都可以但是要先给钱.jpg').cqcode)
         return
     count = 0
-    for m in ev['message']:
+    for m in ev.message:
         if m.type == 'at' and m.data['qq'] != 'all':
             uid = int(m.data['qq'])
             _nlmt.reset(uid)

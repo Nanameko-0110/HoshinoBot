@@ -24,7 +24,7 @@ async def broadcast(session: CommandSession):
                     hoshino.logger.critical(f'向广播发起者进行错误回报时发生错误：{type(e)}')
     await session.send(f'广播完成！')
 
-@on_command('broadcast1', aliases=('bc1', '广播1'), permission=perm.SUPERUSER)
+@sucmd('broadcast1', aliases=('bc1', '广播1'))
 async def broadcast(session:CommandSession):
     msg = session.current_arg
     g = 1062012716
@@ -39,7 +39,7 @@ async def broadcast(session:CommandSession):
             logger.critical(f'向广播发起者进行错误回报时发生错误：{type(e)}')
     await session.send(f'广播完成！')
 
-@on_command('broadcast2', aliases=('bc2', '广播2'), permission=perm.SUPERUSER)
+@sucmd('broadcast2', aliases=('bc2', '广播2'))
 async def broadcast(session:CommandSession):
     msg = session.current_arg
     g = 908019932
@@ -54,7 +54,7 @@ async def broadcast(session:CommandSession):
             logger.critical(f'向广播发起者进行错误回报时发生错误：{type(e)}')
     await session.send(f'广播完成！')
 
-@on_command('broadcast3', aliases=('bc3', '广播3'), permission=perm.SUPERUSER)
+@sucmd('broadcast3', aliases=('bc3', '广播3'))
 async def broadcast(session:CommandSession):
     msg = session.current_arg
     g = 963126474

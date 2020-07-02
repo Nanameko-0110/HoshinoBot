@@ -58,13 +58,13 @@ async def gacha_info(bot, ev: CQEvent):
     gacha = Gacha(_group_pool[gid])
     if sv.bot.config.USE_CQPRO:
         up3_chara = *map(lambda x: str(
-            Chara.fromname(x).icon.cqcode) + x + "★★★", gacha.up3),
+            chara.fromname(x).icon.cqcode) + x + "★★★", gacha.up3),
         up2_chara = *map(lambda x: str(
-            Chara.fromname(x).icon.cqcode) + x + "★★", gacha.up2),
+            chara.fromname(x).icon.cqcode) + x + "★★", gacha.up2),
         up1_chara = *map(lambda x: str(
-            Chara.fromname(x).icon.cqcode) + x + "★", gacha.up1),
+            chara.fromname(x).icon.cqcode) + x + "★", gacha.up1),
     up_chara = '\n'.join(up3_chara + up2_chara + up1_chara)
-    await bot.send(f"本期卡池主打的角色：\n{up_chara}\n3★UP角色合计={(gacha.up3_prob/10):.1f}%\n3★出率={(gacha.s3_prob)/10:.1f}%\n{SWITCH_POOL_TIP}")
+    await bot.send(f"本期卡池主打的角色：\n{up_chara}\n3★UP角色合计={(gacha.up3_prob/10):.1f}%\n3★出率={(gacha.s3_prob)/10:.1f}%\n{POOL_NAME_TIP}")
 
 POOL_NAME_TIP = '请选择以下卡池\n> 切换卡池jp\n> 切换卡池tw\n> 切换卡池b\n> 切换卡池mix'
 @sv.on_prefix(('切换卡池', '选择卡池', '切換卡池', '選擇卡池'))

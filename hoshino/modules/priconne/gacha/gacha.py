@@ -35,7 +35,7 @@ class Gacha(object):
         upx_prob: x星UP角色概率（从x星划出）
         up_chara: UP角色名列表
 
-        return: (单抽结果:Chara, 秘石数:int)
+        return: (单抽结果:chara, 秘石数:int)
         ---------------------------
         |up|      |  20  |   78   |
         |   ***   |  **  |    *   |
@@ -46,15 +46,15 @@ class Gacha(object):
         total_ = s3_prob + s2_prob + s1_prob
         pick = random.randint(1, total_)
         if pick <= up3_prob:
-            return Chara.fromname(random.choice(self.up3), 3), 100
+            return chara.fromname(random.choice(self.up3), 3), 100
         elif pick <= s3_prob:
-            return Chara.fromname(random.choice(self.star3), 3), 50
+            return chara.fromname(random.choice(self.star3), 3), 50
         elif pick <= up2_prob + s3_prob:
-            return Chara.fromname(random.choice(self.up2), 2), 10
+            return chara.fromname(random.choice(self.up2), 2), 10
         elif pick <= s2_prob + s3_prob:
-            return Chara.fromname(random.choice(self.star2), 2), 10
+            return chara.fromname(random.choice(self.star2), 2), 10
         elif pick <= up1_prob + s2_prob + s3_prob:
-            return Chara.fromname(random.choice(self.up1), 1), 1
+            return chara.fromname(random.choice(self.up1), 1), 1
         else:
             return chara.fromname(random.choice(self.star1), 1), 1
 
