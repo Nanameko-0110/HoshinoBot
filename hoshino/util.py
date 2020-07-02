@@ -152,6 +152,11 @@ class DailyNumberLimiter:
         return bool(self.count[key] < self.max)
 
     def get_num(self, key):
+        now = datetime.now(self.tz)
+        day = (now - timedelta(hours=5)).day
+        if day != self.today:
+            self.today = day
+            self.count.clear()
         return self.count[key]
 
     def increase(self, key, num=1):

@@ -7,7 +7,7 @@ except:
     import json
 
 from hoshino import util
-from hoshino import NoneBot, CommandSession, MessageSegment, Service, Privilege as Priv
+from hoshino import R, NoneBot, CommandSession, MessageSegment, Service, Privilege as Priv
 from hoshino.util import silence, concat_pic, pic2b64, DailyNumberLimiter
 
 from .gacha import Gacha
@@ -22,7 +22,7 @@ JEWEL_EXCEED_NOTICE = f'您今天已经抽过{jewel_limit.max}钻了，欢迎明
 TENJO_EXCEED_NOTICE = f'您今天已经抽过{tenjo_limit.max}张天井券了，欢迎明早5点后再来！'
 SWITCH_POOL_TIP = 'β>发送"选择卡池"可切换'
 POOL = ('MIX', 'JP', 'TW', 'BL')
-DEFAULT_POOL = POOL[0]
+DEFAULT_POOL = POOL[3]
 
 _pool_config_file = os.path.expanduser('~/.hoshino/group_pool_config.json')
 _group_pool = {}
@@ -50,12 +50,15 @@ gacha_300_aliases = ('抽一井', '来一井', '来发井', '抽发井', '天井
 async def gacha_info(session:CommandSession):
     gid = str(session.ctx['group_id'])
     gacha = Gacha(_group_pool[gid])
-    up_chara = gacha.up
     if sv.bot.config.IS_CQPRO:
-        up_chara = map(lambda x: str(
-            Chara.fromname(x).icon.cqcode) + x, up_chara)
-    up_chara = '\n'.join(up_chara)
-    await session.send(f"本期卡池主打的角色：\n{up_chara}\nUP角色合计={(gacha.up_prob/10):.1f}% 3★出率={(gacha.s3_prob)/10:.1f}%\n{SWITCH_POOL_TIP}")
+        up3_chara = *map(lambda x: str(
+            Chara.fromname(x).icon.cqcode) + x + "★★★", gacha.up3),
+        up2_chara = *map(lambda x: str(
+            Chara.fromname(x).icon.cqcode) + x + "★★", gacha.up2),
+        up1_chara = *map(lambda x: str(
+            Chara.fromname(x).icon.cqcode) + x + "★", gacha.up1),
+    up_chara = '\n'.join(up3_chara + up2_chara + up1_chara)
+    await session.send(f"本期卡池主打的角色：\n{up_chara}\n3★UP角色合计={(gacha.up3_prob/10):.1f}%\n3★出率={(gacha.s3_prob)/10:.1f}%\n{SWITCH_POOL_TIP}")
 
 
 POOL_NAME_TIP = '请选择以下卡池\n> 选择卡池 jp\n> 选择卡池 tw\n> 选择卡池 bilibili\n> 选择卡池 mix'
@@ -106,14 +109,14 @@ async def gacha_1(session:CommandSession):
 
     gid = str(session.ctx['group_id'])
     gacha = Gacha(_group_pool[gid])
-    chara, hiishi = gacha.gacha_one(gacha.up_prob, gacha.s3_prob, gacha.s2_prob)
+    chara, hiishi = gacha.gacha_one(gacha.up3_prob, gacha.up2_prob, gacha.up1_prob, gacha.s3_prob, gacha.s2_prob, gacha.s1_prob)
     silence_time = hiishi * 60
 
     res = f'{chara.name} {"★"*chara.star}'
     if sv.bot.config.IS_CQPRO:
         res = f'{chara.icon.cqcode} {res}'
 
-    await silence(session.ctx, silence_time)
+    # await silence(session.ctx, silence_time)
     await session.send(f'素敵な仲間が増えますよ！\n{res}\n{SWITCH_POOL_TIP}', at_sender=True)
 
 
@@ -149,7 +152,11 @@ async def gacha_10(session:CommandSession):
     if hiishi >= SUPER_LUCKY_LINE:
         await session.send('恭喜海豹！おめでとうございます！')
     await session.send(f'素敵な仲間が増えますよ！\n{res}\n{SWITCH_POOL_TIP}', at_sender=True)
-    await silence(session.ctx, silence_time)
+    c_count = {c:result.count(c) for c in result}
+    c_feat = max(zip(c_count.values(), c_count.keys()))
+    if c_feat[0] >= 3:
+        await session.send(f'{c_feat[1].strip("★")}爱你哟~♪')
+    # await silence(session.ctx, silence_time)
 
 
 @sv.on_command('gacha_300', deny_tip=GACHA_DISABLE_NOTICE, aliases=gacha_300_aliases, only_to_me=True)
@@ -162,41 +169,48 @@ async def gacha_300(session:CommandSession):
     gid = str(session.ctx['group_id'])
     gacha = Gacha(_group_pool[gid])
     result = gacha.gacha_tenjou()
-    up = len(result['up'])
+    up3 = len(result['up3'])
     s3 = len(result['s3'])
     s2 = len(result['s2'])
     s1 = len(result['s1'])
 
-    res = [*(result['up']), *(result['s3'])]
+    res = [*(result['up3']), *(result['s3'])]
     random.shuffle(res)
-    lenth = len(res)
-    if lenth <= 0:
+    length = len(res)
+    if length <= 0:
         res = "竟...竟然没有3★？！"
     else:
         step = 4
         pics = []
-        for i in range(0, lenth, step):
-            j = min(lenth, i + step)
+        for i in range(0, length, step):
+            j = min(length, i + step)
             pics.append(Chara.gen_team_pic(res[i:j], star_slot_verbose=False))
         res = concat_pic(pics)
         res = pic2b64(res)
         res = MessageSegment.image(res)
 
+    # msg = [
+        # f"\n素敵な仲間が増えますよ！ {res}",
+        # f"★★★×{up3+s3} ★★×{s2} ★×{s1}",
+        # f"获得记忆碎片×{100*up}与女神秘石×{50*(up3+s3) + 10*s2 + s1}！\n第{result['first_up_pos']}抽首次获得3★up角色" if up3 else f"获得女神秘石{50*(up3+s3) + 10*s2 + s1}个！"
+    # ]
+    
     msg = [
         f"\n素敵な仲間が増えますよ！ {res}",
-        f"★★★×{up+s3} ★★×{s2} ★×{s1}",
-        f"获得记忆碎片×{100*up}与女神秘石×{50*(up+s3) + 10*s2 + s1}！\n第{result['first_up_pos']}抽首次获得up角色" if up else f"获得女神秘石{50*(up+s3) + 10*s2 + s1}个！"
+        f"★★★×{up3+s3} ★★×{s2} ★×{s1}",
+        f"获得女神秘石×{50*(up3+s3) + 10*s2 + s1}！\n第{result['first_up_pos']}抽首次获得3★up角色" if up3 else f"获得女神秘石{50*(up3+s3) + 10*s2 + s1}个！"
     ]
 
-    if up == 0 and s3 == 0:
+    if up3 == 0 and s3 == 0:
         msg.append("太惨了，咱们还是退款删游吧...")
-    elif up == 0 and s3 > 7:
+    elif up3 == 0 and s3 > 7:
         msg.append("up呢？我的up呢？")
-    elif up == 0 and s3 <= 3:
+    elif up3 == 0 and s3 <= 3:
         msg.append("这位酋长，梦幻包考虑一下？")
-    elif up == 0:
+    elif up3 == 0:
         msg.append("据说天井的概率只有12.16%")
-    elif up <= 2:
+    # elif up3 <= 2:
+    else:
         if result['first_up_pos'] < 50:
             msg.append("你的喜悦我收到了，滚去喂鲨鱼吧！")
         elif result['first_up_pos'] < 100:
@@ -207,20 +221,21 @@ async def gacha_300(session:CommandSession):
             msg.append("补井还是不补井，这是一个问题...")
         else:
             msg.append("期望之内，亚洲水平")
-    elif up == 3:
-        msg.append("抽井母五一气呵成！多出30等专武～")
-    elif up >= 4:
-        msg.append("记忆碎片一大堆！您是托吧？")
+    # elif up3 == 3:
+        # msg.append("抽井母五一气呵成！多出30等专武～")
+    # elif up3 >= 4:
+        # msg.append("记忆碎片一大堆！您是托吧？")
     msg.append(SWITCH_POOL_TIP)
 
     await session.send('\n'.join(msg), at_sender=True)
-    silence_time = (100*up + 50*(up+s3) + 10*s2 + s1) * 1
-    await silence(session.ctx, silence_time)
+    silence_time = (100*up3 + 50*(up3+s3) + 10*s2 + s1) * 1
+    # await silence(session.ctx, silence_time)
 
 
 @sv.on_rex(r'^氪金$', normalize=False)
 async def kakin(bot: NoneBot, ctx, match):
     if ctx['user_id'] not in bot.config.SUPERUSERS:
+        await bot.send(ctx, R.img('都可以但是要先给钱.jpg').cqcode)
         return
     count = 0
     for m in ctx['message']:

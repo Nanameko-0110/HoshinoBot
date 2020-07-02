@@ -1,9 +1,9 @@
 import pytz
 from datetime import datetime
-from hoshino import util
+from hoshino import R, util
 from hoshino.service import Service
 
-sv = Service('hourcall', enable_on_default=False)
+sv = Service('hourcall', enable_on_default=True)
 
 def get_hour_call():
     """从HOUR_CALLS中挑出一组时报，每日更换，一日之内保持相同"""

@@ -1,3 +1,4 @@
+import os
 import random
 from datetime import timedelta
 
@@ -5,6 +6,21 @@ from nonebot import on_command
 from hoshino import util
 from hoshino.res import R
 from hoshino.service import Service, Privilege as Priv
+
+pic_folder = R.img('pohai/').path
+
+def pic_gener():
+    while True:
+        filelist = os.listdir(pic_folder)
+        random.shuffle(filelist)
+        for filename in filelist:
+            if os.path.isfile(os.path.join(pic_folder, filename)):
+                yield R.img('pohai/', filename).cqcode
+                
+pic_gener = pic_gener()
+
+def get_pic():
+    return pic_gener.__next__()
 
 # basic function for debug, not included in Service('chat')
 @on_command('zai?', aliases=('在?', '在？', '在吗', '在么？', '在嘛', '在嘛？'))
@@ -45,6 +61,13 @@ async def ddhaole(session):
 async def nihaole(session):
     await session.send('不许好，憋回去！')
     await util.silence(session.ctx, 30)
+
+# ============================================ #
+
+@sv.on_command('迫害松鼠', aliases=('松鼠语录', ), only_to_me=True)
+async def pohaisongshu(session):
+    pic = get_pic()
+    await session.send(pic)
 
 # ============================================ #
 

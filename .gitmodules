@@ -1,0 +1,4 @@
+[submodule "hoshino/modules/yobot/yobot"]
+	path = hoshino/modules/yobot/yobot
+	url = https://github.com/yuudi/yobot.git
+	branch = develop
