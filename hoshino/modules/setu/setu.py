@@ -1,18 +1,14 @@
 import os
-import re
-import time
 import random
 import asyncio
 import requests
 
 from urllib.parse import urlparse
 
-from nonebot import on_command, CommandSession, MessageSegment, NoneBot
 from nonebot.exceptions import CQHttpError
 
-from hoshino import R, Service, Privilege
+from hoshino import R, Service, priv
 from hoshino.util import FreqLimiter, DailyNumberLimiter, fig2b64
-
 from matplotlib import pyplot as plt
 
 _max = 5
@@ -22,7 +18,7 @@ _ncnt = DailyNumberLimiter(0)  # 记录调用次数
 _nlmt = DailyNumberLimiter(_max)
 _flmt = FreqLimiter(5)
 
-sv = Service('setu', manage_priv=Privilege.SUPERUSER, enable_on_default=True, visible=False)
+sv = Service('setu', manage_priv=priv.SUPERUSER, enable_on_default=True, visible=False)
 setu_folder = R.img('setu/').path
 r18_setu_folder = R.img('setu_r18/').path
 
@@ -78,95 +74,83 @@ def get_setu(R18=False, keyword=''):
 
 # 正则解析所有文本并响应
 
-# @sv.on_rex(re.compile(r'不够[涩瑟色]|[涩瑟色]图|来一?[点份张].*[涩瑟色]|再来[点份张]|看过了|铜'), normalize=True)
-# async def setu(bot:NoneBot, ctx, match):
+# @sv.on_rex(r'不够[涩瑟色]|[涩瑟色]图|来一?[点份张].*[涩瑟色]|再来[点份张]|看过了|铜')
+# async def setu(bot, ev):
     # """随机叫一份涩图，对每个用户有冷却时间"""
-    # uid = ctx['user_id']    
+    # uid = ev['user_id']
     # if not _nlmt.check(uid):
-        # await bot.send(ctx, EXCEED_NOTICE, at_sender=True)
+        # await bot.send(ev, EXCEED_NOTICE, at_sender=True)
         # return
     # if not _flmt.check(uid):
-        # await bot.send(ctx, '您冲得太快了，请稍候再冲', at_sender=True)
+        # await bot.send(ev, '您冲得太快了，请稍候再冲', at_sender=True)
         # return
     # _flmt.start_cd(uid)
     # _nlmt.increase(uid)
 
     # # conditions all ok, send a setu.
-    # pic = get_setu()
+        
     # try:
-        # await bot.send(ctx, pic)
+        # await bot.send(ev, pic.cqcode)
     # except CQHttpError:
-        # sv.logger.error(f"发送图片{pic.data['file']}失败")
+        # sv.logger.error(f"发送图片{pic.path}失败")
         # try:
-            # await bot.send(ctx, '涩图太涩，发不出去勒...')
-        # except:
-            # pass
+            # await bot.send(ev, '涩图太涩，发不出去勒...')
 
 
 # 以命令形式响应
 
 @sv.on_command('setu', deny_tip=SETU_DISABLE_NOTICE, aliases=setu_aliases, only_to_me=True)
-async def setu(session:CommandSession):
+async def setu(bot, ev):
     """随机叫一份涩图，对每个用户有冷却时间"""
-    uid = session.ctx['user_id']
+    uid = ev['user_id']
     _ncnt.check(uid)  # 刷新次数
-    if uid not in session.bot.config.SUPERUSERS:
+    if uid not in bot.config.SUPERUSERS:
         if not _nlmt.check(uid):
-            await session.send(EXCEED_NOTICE, at_sender=True)
+            await bot.send(ev, EXCEED_NOTICE, at_sender=True)
             return
         if not _flmt.check(uid):
-            await session.send('您冲得太快了，请稍候再冲', at_sender=True)
+            await bot.send(ev, '您冲得太快了，请稍候再冲', at_sender=True)
             return
-
-    # conditions all ok, send a setu.
-    kw = session.get('keyword')  # 按关键词查询
-
-    if random.random() < 0.05:
-        r18 = True
-    else:
-        r18 = False
-        
-    try:
         pic, meta = get_setu(r18, kw)
-        msg_id = (await session.send(f'{pic.cqcode}\nPid: {meta[0]}\tAuthor: {meta[1]}\nTags: {"; ".join(meta[2][1::2])}'))['message_id']
-        self_id = session.ctx['self_id']
+        msg_id = (await bot.send(ev, f'{pic.cqcode}\nPid: {meta[0]}\tAuthor: {meta[1]}\nTags: {"; ".join(meta[2][1::2])}'))['message_id']
+        self_id = ev['self_id']
         _flmt.start_cd(uid)
         _nlmt.increase(uid)
         _ncnt.increase(uid)
     except CQHttpError:
         sv.logger.error(f"发送图片失败")
         try:
-            await session.send('涩图太涩，发不出去啦……')
+            await bot.send(ev, '涩图太涩，发不出去啦……')
         except:
             pass
 
     if r18:
         await asyncio.sleep(10)
-        await session.bot.delete_msg(self_id=self_id, message_id=msg_id)
+        await bot.delete_msg(self_id=self_id, message_id=msg_id)
         chieri = R.img('chieri2.jpg').cqcode
-        await session.send(f'这张涩图太涩，不给你们看啦！\n{chieri}')
+        await bot.send(ev, f'这张涩图太涩，不给你们看啦！\n{chieri}')
 
 
 # setu.args_parser 装饰器将函数声明为 setu 命令的参数解析器
 # 命令解析器用于将用户输入的参数解析成命令真正需要的数据
 @setu.args_parser
-async def _(session: CommandSession):
+async def _(session:CommandSession):
     stripped_arg = session.current_arg_text.strip()
     session.state['keyword'] = stripped_arg
 
 
 @sv.on_command('涩图头子排行榜', aliases='色图头子排行榜', only_to_me=True)
-async def setu_ranking(session:CommandSession):
+async def setu_ranking(bot, ev):
     mstat = []
-    mlist = (await session.bot.get_group_member_list(self_id=session.ctx['self_id'], group_id=session.ctx['group_id']))
+    mlist = (await bot.get_group_member_list(self_id=ev['self_id'], group_id=ev['group_id']))
     for m in mlist:
-        if _ncnt.get_num(m['user_id']) and m['user_id'] not in session.bot.config.SUPERUSERS:
+        if _ncnt.get_num(m['user_id']) and m['user_id'] not in bot.config.SUPERUSERS:
             mstat.append((m['nickname'], _ncnt.get_num(m['user_id'])))
     mstat.sort(key=lambda x: x[1], reverse=True)
     
     yn = len(mstat)
     if not yn:
-        await session.send(f'今天的涩图头子还没有出现呢！大家继续加油哦～♪')
+        await bot.send(ev, f'今天的涩图头子还没有出现呢！大家继续加油哦～♪')
         return
     else:
         fig, ax = plt.subplots()
@@ -191,20 +175,20 @@ async def setu_ranking(session:CommandSession):
         pic = fig2b64(plt)
         plt.close()
 
-        await session.send(MessageSegment.image(pic), at_sender=True)
+        await bot.send(ev, MessageSegment.image(pic), at_sender=True)
 
 
 @sv.on_rex(r'^来瓶营养快线$', normalize=False)
-async def energize(bot: NoneBot, ctx, match):
-    if ctx['user_id'] not in bot.config.SUPERUSERS:
-        await bot.send(ctx, R.img('都可以但是要先给钱.jpg').cqcode)
+async def energize(bot, ev):
+    if ev['user_id'] not in bot.config.SUPERUSERS:
+        await bot.send(ev, R.img('都可以但是要先给钱.jpg').cqcode)
         return
     count = 0
-    for m in ctx['message']:
+    for m in ev['message']:
         if m.type == 'at' and m.data['qq'] != 'all':
             uid = int(m.data['qq'])
             _nlmt.reset(uid)
             count += 1
     if count:
-        await bot.send(ctx, f"已为{count}位用户送出营养快线一瓶！记得不要冲得太快哦～")
+        await bot.send(ev, f"已为{count}位用户送出营养快线一瓶！记得不要冲得太快哦～")
 

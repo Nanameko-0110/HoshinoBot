@@ -1,12 +1,12 @@
 import random
 
 from hoshino import util
-from ..chara import Chara
+from .. import chara
 
 
 class Gacha(object):
 
-    def __init__(self, pool_name:str="MIX"):
+    def __init__(self, pool_name:str = "MIX"):
         super().__init__()
         self.load_pool(pool_name)
 
@@ -56,7 +56,7 @@ class Gacha(object):
         elif pick <= up1_prob + s2_prob + s3_prob:
             return Chara.fromname(random.choice(self.up1), 1), 1
         else:
-            return Chara.fromname(random.choice(self.star1), 1), 1
+            return chara.fromname(random.choice(self.star1), 1), 1
 
 
     def gacha_ten(self):
