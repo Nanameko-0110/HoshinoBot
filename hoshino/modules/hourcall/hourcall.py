@@ -1,4 +1,5 @@
 import pytz
+import hoshino
 from datetime import datetime
 from hoshino import R, util
 from hoshino.service import Service

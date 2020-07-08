@@ -115,8 +115,8 @@ async def setu(bot, ev: CQEvent):
             return
     kw = ev.message.extract_plain_text()
     r18 = True if random.random() < 0.05 else False
-    pic, meta = get_setu(r18, kw)
     try:
+        pic, meta = get_setu(r18, kw)
         msg_id = (await bot.send(ev, f'{pic.cqcode}\nPid: {meta[0]}\tAuthor: {meta[1]}\nTags: {"; ".join(meta[2][1::2])}'))['message_id']
         self_id = ev['self_id']
         _flmt.start_cd(uid)

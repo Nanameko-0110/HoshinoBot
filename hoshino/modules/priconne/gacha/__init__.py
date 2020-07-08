@@ -2,7 +2,7 @@ import os
 import random
 from collections import defaultdict
 
-from hoshino import Service, priv, util
+from hoshino import R, Service, priv, util
 from hoshino.typing import *
 from hoshino.util import DailyNumberLimiter, concat_pic, pic2b64, silence
 
@@ -64,7 +64,7 @@ async def gacha_info(bot, ev: CQEvent):
         up1_chara = *map(lambda x: str(
             chara.fromname(x).icon.cqcode) + x + "★", gacha.up1),
     up_chara = '\n'.join(up3_chara + up2_chara + up1_chara)
-    await bot.send(f"本期卡池主打的角色：\n{up_chara}\n3★UP角色合计={(gacha.up3_prob/10):.1f}%\n3★出率={(gacha.s3_prob)/10:.1f}%\n{POOL_NAME_TIP}")
+    await bot.send(ev, f"本期卡池主打的角色：\n{up_chara}\n3★UP角色合计={(gacha.up3_prob/10):.1f}%\n3★出率={(gacha.s3_prob)/10:.1f}%\n{POOL_NAME_TIP}")
 
 POOL_NAME_TIP = '请选择以下卡池\n> 切换卡池jp\n> 切换卡池tw\n> 切换卡池b\n> 切换卡池mix'
 @sv.on_prefix(('切换卡池', '选择卡池', '切換卡池', '選擇卡池'))
@@ -112,12 +112,12 @@ async def gacha_1(bot, ev: CQEvent):
     gid = str(ev.group_id)
     gacha = Gacha(_group_pool[gid])
     chara, hiishi = gacha.gacha_one(gacha.up3_prob, gacha.up2_prob, gacha.up1_prob, gacha.s3_prob, gacha.s2_prob, gacha.s1_prob)
-    silence_time = hiishi * 60
 
     res = f'{chara.name} {"★"*chara.star}'
     if sv.bot.config.USE_CQPRO:
         res = f'{chara.icon.cqcode} {res}'
 
+    # silence_time = hiishi * 60
     # await silence(ev, silence_time)
     await bot.send(ev, f'素敵な仲間が増えますよ！\n{res}', at_sender=True)
 
@@ -132,9 +132,8 @@ async def gacha_10(bot, ev: CQEvent):
     gid = str(ev.group_id)
     gacha = Gacha(_group_pool[gid])
     result, hiishi = gacha.gacha_ten()
-    silence_time = hiishi * 6 if hiishi < SUPER_LUCKY_LINE else hiishi * 60
 
-    if sv.bot.config.USE_CQPRO:
+    if bot.config.USE_CQPRO:
         res1 = chara.gen_team_pic(result[:5], star_slot_verbose=False)
         res2 = chara.gen_team_pic(result[5:], star_slot_verbose=False)
         res = concat_pic([res1, res2])
@@ -156,7 +155,8 @@ async def gacha_10(bot, ev: CQEvent):
     c_count = {c:result.count(c) for c in result}
     c_feat = max(zip(c_count.values(), c_count.keys()))
     if c_feat[0] >= 3:
-        await bot.send(f'{c_feat[1].strip("★")}爱你哟~♪')
+        await bot.send(ev, f'{c_feat[1].strip("★")}爱你哟~♪')
+    # silence_time = hiishi * 6 if hiishi < SUPER_LUCKY_LINE else hiishi * 60
     # await silence(ev, silence_time)
 
 
@@ -182,8 +182,8 @@ async def gacha_300(bot, ev: CQEvent):
     else:
         step = 4
         pics = []
-        for i in range(0, lenth, step):
-            j = min(lenth, i + step)
+        for i in range(0, length, step):
+            j = min(length, i + step)
             pics.append(chara.gen_team_pic(res[i:j], star_slot_verbose=False))
         res = concat_pic(pics)
         res = pic2b64(res)
@@ -227,13 +227,14 @@ async def gacha_300(bot, ev: CQEvent):
         # msg.append("记忆碎片一大堆！您是托吧？")
 
     await bot.send(ev, '\n'.join(msg), at_sender=True)
-    silence_time = (100*up + 50*(up+s3) + 10*s2 + s1) * 1
+    # silence_time = (100*up + 50*(up+s3) + 10*s2 + s1) * 1
     # await silence(ev, silence_time)
 
 
 @sv.on_prefix('氪金')
 async def kakin(bot, ev: CQEvent):
-    if ev.user_id not in bot.config.SUPERUSERS:
+    if ev['user_id'] not in bot.config.SUPERUSERS:
+        await bot.send(ev, R.img('都可以但是要先给钱.jpg').cqcode)
         return
     count = 0
     for m in ev.message:

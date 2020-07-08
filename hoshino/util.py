@@ -15,6 +15,8 @@ from PIL import Image
 import hoshino
 from hoshino.typing import CQEvent
 
+from random import randint
+
 try:
     import ujson as json
 except:
@@ -61,6 +63,10 @@ async def silence(ev: CQEvent, ban_time, skip_su=True):
 
 def pic2b64(pic:Image) -> str:
     buf = BytesIO()
+    w, h = pic.size[:2]
+    pixels = pic.load()
+    for i, j in [(0, 0), (0, h - 1), (w - 1, 0), (w - 1, h - 1)]:
+        pixels[i,j] = (randint(0, 255), randint(0, 255), randint(0, 255))
     pic.save(buf, format='PNG')
     base64_str = base64.b64encode(buf.getvalue()).decode()
     return 'base64://' + base64_str
