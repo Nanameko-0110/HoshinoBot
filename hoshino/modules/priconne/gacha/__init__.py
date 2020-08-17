@@ -45,14 +45,11 @@ def dump_pool_config():
 
 
 gacha_10_aliases = ('抽十连', '十连', '十连！', '十连抽', '来个十连', '来发十连', '来次十连', '抽个十连', '抽发十连', '抽次十连', '十连扭蛋', '扭蛋十连',
-                    '10连', '10连！', '10连抽', '来个10连', '来发10连', '来次10连', '抽个10连', '抽发10连', '抽次10连', '10连扭蛋', '扭蛋10连',
-                    '十連', '十連！', '十連抽', '來個十連', '來發十連', '來次十連', '抽個十連', '抽發十連', '抽次十連', '十連轉蛋', '轉蛋十連',
-                    '10連', '10連！', '10連抽', '來個10連', '來發10連', '來次10連', '抽個10連', '抽發10連', '抽次10連', '10連轉蛋', '轉蛋10連')
-gacha_1_aliases = ('单抽', '单抽！', '来发单抽', '来个单抽', '来次单抽', '扭蛋单抽', '单抽扭蛋',
-                   '單抽', '單抽！', '來發單抽', '來個單抽', '來次單抽', '轉蛋單抽', '單抽轉蛋')
-gacha_300_aliases = ('抽一井', '来一井', '来发井', '抽发井', '天井扭蛋', '扭蛋天井', '天井轉蛋', '轉蛋天井')
+                    '10连', '10连！', '10连抽', '来个10连', '来发10连', '来次10连', '抽个10连', '抽发10连', '抽次10连', '10连扭蛋', '扭蛋10连')
+gacha_1_aliases = ('单抽', '单抽！', '来发单抽', '来个单抽', '来次单抽', '扭蛋单抽', '单抽扭蛋')
+gacha_300_aliases = ('抽一井', '来一井', '来发井', '抽发井', '天井扭蛋', '扭蛋天井')
 
-@sv.on_fullmatch(('卡池资讯', '查看卡池', '看看卡池', '康康卡池', '卡池資訊', '看看up', '看看UP'))
+@sv.on_fullmatch(('卡池资讯', '查看卡池', '看看卡池', '康康卡池', '看看up', '看看UP'))
 async def gacha_info(bot, ev: CQEvent):
     gid = str(ev.group_id)
     gacha = Gacha(_group_pool[gid])
@@ -67,7 +64,7 @@ async def gacha_info(bot, ev: CQEvent):
     await bot.send(ev, f"本期卡池主打的角色：\n{up_chara}\n3★UP角色合计={(gacha.up3_prob/10):.1f}%\n3★出率={(gacha.s3_prob)/10:.1f}%\n{POOL_NAME_TIP}")
 
 POOL_NAME_TIP = '请选择以下卡池\n> 切换卡池jp\n> 切换卡池tw\n> 切换卡池b\n> 切换卡池mix'
-@sv.on_prefix(('切换卡池', '选择卡池', '切換卡池', '選擇卡池'))
+@sv.on_prefix(('切换卡池', '选择卡池'))
 async def set_pool(bot, ev: CQEvent):
     if not priv.check_priv(ev, priv.ADMIN):
         await bot.finish(ev, '只有群管理才能切换卡池', at_sender=True)
@@ -113,9 +110,7 @@ async def gacha_1(bot, ev: CQEvent):
     gacha = Gacha(_group_pool[gid])
     chara, hiishi = gacha.gacha_one(gacha.up3_prob, gacha.up2_prob, gacha.up1_prob, gacha.s3_prob, gacha.s2_prob, gacha.s1_prob)
 
-    res = f'{chara.name} {"★"*chara.star}'
-    if sv.bot.config.USE_CQPRO:
-        res = f'{chara.icon.cqcode} {res}'
+    res = f'{chara.icon.cqcode} {chara.name} {"★"*chara.star}'
 
     # silence_time = hiishi * 60
     # await silence(ev, silence_time)
