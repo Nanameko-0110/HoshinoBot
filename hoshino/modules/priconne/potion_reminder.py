@@ -2,7 +2,7 @@ from hoshino import R
 
 from hoshino.service import Service
 
-svpt = Service('pcr-potion-reminder', enable_on_default=True)
+svpt = Service('pcr-potion-reminder', enable_on_default=False)
 msg = R.img('提醒买药小助手.jpg').cqcode
 TAG = 'potion-reminder'
 

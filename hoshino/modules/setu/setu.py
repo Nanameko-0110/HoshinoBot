@@ -13,7 +13,7 @@ from hoshino.typing import *
 from hoshino.util import FreqLimiter, DailyNumberLimiter, fig2b64
 from matplotlib import pyplot as plt
 
-_max = 5
+_max = 10
 SETU_DISABLE_NOTICE = '本群涩图功能已禁用\n如欲开启，请与维护组联系'
 EXCEED_NOTICE = f'您今天已经冲过{_max}次了，请明早5点后再来！'
 _ncnt = DailyNumberLimiter(0)  # 记录调用次数
