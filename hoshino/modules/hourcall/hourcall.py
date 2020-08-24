@@ -1,8 +1,8 @@
 import pytz
-import hoshino
 from datetime import datetime
-from hoshino import R, util
-from hoshino.service import Service
+import hoshino
+from hoshino import Service
+
 
 sv = Service('hourcall', enable_on_default=False, help_='时报')
 tz = pytz.timezone('Asia/Shanghai')

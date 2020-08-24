@@ -61,6 +61,7 @@ def str2cheru(s: str) -> str:
         c.append(w)
     return ''.join(c)
 
+
 def cheru2str(c: str) -> str:
     return rex_cheru_word.sub(lambda w: cheru2word(w.group()), c)
 

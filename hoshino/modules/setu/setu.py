@@ -188,4 +188,3 @@ async def energize(bot, ev):
             count += 1
     if count:
         await bot.send(ev, f"已为{count}位用户送出营养快线一瓶！记得不要冲得太快哦～")
-
