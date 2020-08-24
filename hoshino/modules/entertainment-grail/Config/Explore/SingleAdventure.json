@@ -1,0 +1,117 @@
+{
+    "eventlist":[
+        {   "id":1,
+            "event":"参与了连续7天7夜的直播挑战，路过的土豪开通了皇帝，获得 {gold} 金币",
+            "goldmax":170,
+            "goldmin":150
+        },
+        {
+            "id":2,
+            "event":"从森林里挖出了 {gold} 金币",
+            "goldmax":500,
+            "goldmin":300
+        },
+        {
+            "id":3,
+            "event":"在大街上当众贩剑，赚了 {gold} 金币。",
+            "goldmax":150,
+            "goldmin":90
+        },
+        {
+            "id":4,
+            "event":"在冒险过程中发现了一个隐蔽的山洞，在里面获得了 {goodsid}。",
+            "goodsid":2,
+            "amount":1
+        },
+        {
+            "id":5,
+            "event":"在夜市辛苦摆摊卖小黄书七天七夜，赚了 {gold} 金币。",
+            "gold":100
+        },
+        {
+            "id":6,
+            "event":"在b站为了得到主播小姐姐的青睐，开了一个总督，损失了 {gold} 金币。",
+            "goldmax":80,
+            "goldmin":30,
+            "type":"loss"
+        },
+        {
+            "id":7,
+            "event":"遇到一个卖茶叶的，但是反过去骗了对方很多茶叶，泡了1杯昏睡红茶。",
+            "goodsid":12,
+            "amount":1
+        },
+        {
+            "id":8,
+            "event":"在漫展大喊「雪菜碧池」，被一群人殴打至伤残，自己搭了 {gold} 金币作为医药费。",
+            "goldmax":80,
+            "goldmin":40,
+            "type":"loss"
+        },
+        {
+            "id":9,
+            "event":"在漫展大喊「冬马小三」，被一群人殴打至伤残，自己搭了 {gold} 金币作为医药费。",
+            "goldmax":110,
+            "goldmin":80,
+            "type":"loss"
+        },
+        {
+            "id":10,
+            "event":"学习了精准的德国工艺，自己动手制作出了 [高级大师球x1]，但是买材料花费了 {gold} 金币。",
+            "goldmax":60,
+            "goldmin":30,
+            "type":"loss",
+            "goodsid":2,
+            "amount":1
+        },
+        {
+            "id":11,
+            "event":"向一个小山包的猫神许愿，出来一个不带笑容的少女，得到一个 [工口抱枕]",
+            "goodsid":4,
+            "amount":1
+        },
+        {
+            "id":12,
+            "event":"在便利店门口收拾被塞的凌乱的垃圾箱，店长奖励了 {gold} 金币。",
+            "goldmax":150,
+            "goldmin":90
+        },
+		{
+			"id":13,
+            "event":"路过北京路的时候想偷一名大叔的钱被当场抓住，挨了一顿毒打，并损失了 {gold} 金币。",
+            "goldmax":80,
+            "goldmin":40,
+            "type":"loss"
+		},
+		{
+			"id":14,
+            "event":"被推荐品尝了老八蜜汁晓汉堡，获得 [蜜汁晓汉堡x1] ，但引发战争后遗症治疗花了 {gold} 金币。",
+            "goldmax":1500,
+            "goldmin":500,
+            "type":"loss",
+            "goodsid":17,
+            "amount":1
+		},
+		{
+			"id":15,
+            "event":"遇到了渣渣辉，玩了三分钟《贪玩蓝月》，得到了一把屠龙宝刀。",
+            "goodsid":3,
+            "amount":1
+        },
+        {
+            "id":16,
+            "event":"时间不足参加了罗老师的时间管理课程，花了学费 {gold} 金币，获得 [时间管理秘籍x1]。",
+            "goldmax":1500,
+            "goldmin":1000,
+            "type":"loss",
+            "goodsid":20,
+            "amount":1
+        },
+        {
+            "id":17,
+            "event":"在公主焊接十连抽，得到 [臭鼬头] 一个",
+            "goodsid":19,
+            "amount":1
+        }
+    ]
+}
