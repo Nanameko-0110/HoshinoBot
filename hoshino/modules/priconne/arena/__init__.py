@@ -56,7 +56,7 @@ def render_atk_def_teams(entries, border_pix=5):
     n = len(entries)
     icon_size = 64
     im = Image.new('RGBA', (5 * icon_size + 100, n * (icon_size + border_pix) - border_pix), (255, 255, 255, 255))
-    font = ImageFont.truetype('msyh.ttc', 16)
+    font = ImageFont.truetype('/home/HoshinoBot/hoshino/modules/priconne/arena/msyh.ttc', 16)
     draw = ImageDraw.Draw(im)
     for i, e in enumerate(entries):
         y1 = i * (icon_size + border_pix)

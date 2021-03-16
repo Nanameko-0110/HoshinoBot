@@ -23,3 +23,19 @@ async def broadcast(session: CommandSession):
                 except Exception as e:
                     hoshino.logger.critical(f'向广播发起者进行错误回报时发生错误：{type(e)}')
     await session.send(f'广播完成！')
+
+@sucmd('broadcastclan', aliases=('bcc', '工会广播'))
+async def broadcastclan(session:CommandSession):
+    msg = session.current_arg
+    for sid in hoshino.get_self_ids():
+        g = 344429347
+        try:
+            await session.bot.send_group_msg(self_id=sid, group_id=g, message=msg)
+            hoshino.logger.info(f'群{g} 投递广播成功')
+        except Exception as e:
+            hoshino.logger.error(f'群{g} 投递广播失败 {type(e)}')
+            try:
+                await session.send(f'群{g} 投递广播失败 {type(e)}')
+            except Exception as e:
+                hoshino.logger.critical(f'向广播发起者进行错误回报时发生错误：{type(e)}')
+    await session.send(f'广播完成！')
