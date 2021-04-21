@@ -14,7 +14,12 @@ img/
 imgs/
 image/
 images/
+
+# 圣杯战争记录
 hoshino/modules/entertainment-grail/User/Data/
+
+# 工会排名缓存
+hoshino/modules/clanrank/clanrank.json
 
 # 非公开的组件
 # hoshino/modules/deepchat/
